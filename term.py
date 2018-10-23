@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/local/bin/python2
 #
 # term.py
 #
@@ -14,6 +14,8 @@
 # as is; no warranty is provided, and users accept all 
 # liability.
 #
+
+# pip install pyserial
 
 import sys,time,serial
 from Tkinter import *
