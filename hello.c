@@ -23,7 +23,7 @@
 #include "echo.c"
 #include "wavetable.c"
 
-#define PIN_LED PA4
+#define PIN_LED PB2
 #define PIN_SPK PB2
 #define PIN_BTN1 PA7
 #define PIN_BTN2 PA3
@@ -47,13 +47,13 @@ int main(void) {
 
     // echoSetup();
 
-    DDRA |= (1 << PIN_LED);
+    DDRB |= (1 << PIN_LED);
     DDRA &= (0 << PIN_BTN1);
     DDRA &= (0 << PIN_BTN2);
     DDRA &= (0 << PIN_BTN3);
     uint8_t input = 0;
 
-    DIGIWRITE_H(PORTA, PA4);
+    DIGIWRITE_H(PORTB, PIN_LED);
     while (1) {
         uint8_t new_input = 0;
         new_input |= PRESSED(PIN_BTN1) << 0;
@@ -62,7 +62,7 @@ int main(void) {
         if (new_input != input) {
             input = new_input;
         }
-        DIGIWRITE_L(PORTA, PA4);
+        DIGIWRITE_L(PORTB, PIN_LED);
         switch (input) {
             case 0: _delay_ms(0); break;
             case 1: _delay_ms(100); break;
@@ -73,7 +73,7 @@ int main(void) {
             case 6: _delay_ms(600); break;
             case 7: _delay_ms(700); break;
         }
-        DIGIWRITE_H(PORTA, PA4);
+        DIGIWRITE_H(PORTB, PIN_LED);
         _delay_ms(100);
 
         // echoLoop();
