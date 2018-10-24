@@ -39,3 +39,7 @@ program-ice: $(PROJECT).hex
 program-arduino-usbtiny:
 	cp ~/Documents/test/test.ino.hex .
 	avrdude -p t44 -P usb -c usbtiny -U flash:w:test.ino.hex
+
+clean:
+	rm *.hex
+	rm *.out
