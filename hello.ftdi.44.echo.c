@@ -39,6 +39,18 @@
 
 #define max_buffer 25
 
+
+#define PIN_LED PB2
+#define PIN_BTN1 PA7
+#define PIN_BTN2 PA3
+#define PIN_BTN3 PA2
+
+#define DIGIWRITE_H(port, pin) port |= (1 << pin)
+#define DIGIWRITE_L(port, pin) port &= ~(1 << pin)
+#define PRESSED(pin) ((PINA & (1 << pin)) == 0)
+
+
+
 void get_char(volatile unsigned char *pins, unsigned char pin, char *rxbyte) {
    //
    // read character into rxbyte on pins pin
@@ -179,43 +191,64 @@ void put_string(volatile unsigned char *port, unsigned char pin, char *str) {
       } while (str[index] != 0);
    }
 
+
+// https://www.instructables.com/id/Honey-I-Shrunk-the-Arduino-Moving-from-Arduino-t/
+
 int main(void) {
-   //
-   // main
-   //
-   static char chr;
-   static char buffer[max_buffer] = {0};
-   static int index;
-   //
-   // set clock divider to /1
-   //
-   CLKPR = (1 << CLKPCE);
-   CLKPR = (0 << CLKPS3) | (0 << CLKPS2) | (0 << CLKPS1) | (0 << CLKPS0);
-   //
-   // initialize output pins
-   //
-   set(serial_port, serial_pin_out);
-   output(serial_direction, serial_pin_out);
-   //
-   // main loop
-   //
-   index = 0;
-   DDRA |= (1<<PA7);
-   DDRA |= ~(1<<PA3);
-   while (1) {
-      get_char(&serial_pins, serial_pin_in, &chr);
-      put_string(&serial_port, serial_pin_out, "hello.ftdi.44.echo.c: you typed \"");
-      buffer[index++] = chr;
-      if (index == (max_buffer-1))
+    static char chr;
+    static char buffer[max_buffer] = {0};
+    static int index;
+
+    // set clock divider to /1
+    CLKPR = (1 << CLKPCE);
+    CLKPR = (0 << CLKPS3) | (0 << CLKPS2) | (0 << CLKPS1) | (0 << CLKPS0);
+
+    // initialize output pins
+    set(serial_port, serial_pin_out);
+    output(serial_direction, serial_pin_out);
+
+    index = 0;
+
+    // main loop
+    DDRB |= (1 << PIN_LED);
+    uint8_t input = 0;
+
+    DIGIWRITE_H(PORTB, PIN_LED);
+    while (1) {
+        get_char(&serial_pins, serial_pin_in, &chr);
+        put_string(&serial_port, serial_pin_out, "hello.ftdi.44.echo.c: you typed \"");
+        buffer[index++] = chr;
+        if (index == (max_buffer-1))
          index = 0;
-      put_string(&serial_port, serial_pin_out, buffer);
-      put_char(&serial_port, serial_pin_out, '\"');
-      put_char(&serial_port, serial_pin_out, 10); // new line
-      if ((PINA & (_BV(PA3))) == 0) {
-        PORTA |= ~(1<<PA7);
-      }
-      else {
-        PORTA |= (1<<PA7);
-      }
-   }
+        put_string(&serial_port, serial_pin_out, buffer);
+        put_char(&serial_port, serial_pin_out, '\"');
+        put_char(&serial_port, serial_pin_out, 10); // new line
+
+        // Parse input
+        uint8_t new_input = 0;
+        new_input |= PRESSED(PIN_BTN1) << 0;
+        new_input |= PRESSED(PIN_BTN2) << 1;
+        new_input |= PRESSED(PIN_BTN3) << 2;
+
+        // Do something with input
+        if (new_input != input) {
+            input = new_input;
+            put_string(&serial_port, serial_pin_out, "hey there");
+            put_string(&serial_port, serial_pin_out, itoa(new_input));
+        }
+        continue;
+        DIGIWRITE_L(PORTB, PIN_LED);
+        switch (input) {
+            case 0: _delay_ms(0); break;
+            case 1: _delay_ms(100); break;
+            case 2: _delay_ms(200); break;
+            case 3: _delay_ms(300); break;
+            case 4: _delay_ms(400); break;
+            case 5: _delay_ms(500); break;
+            case 6: _delay_ms(600); break;
+            case 7: _delay_ms(700); break;
+        }
+        DIGIWRITE_H(PORTB, PIN_LED);
+        _delay_ms(100);
+    }
 }
