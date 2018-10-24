@@ -21,15 +21,24 @@
 #include <util/delay.h>
 #include <avr/pgmspace.h>
 #include "echo.c"
+#include "wavetable.c"
 
 #define PIN_LED PA4
+#define PIN_SPK PB2
 #define PIN_BTN1 PA7
 #define PIN_BTN2 PA3
 #define PIN_BTN3 PA2
 
+// TODO
+#define LED PORTA, PA4
+#define SPK PORTB, PB2
+
 #define DIGIWRITE_H(port, pin) port |= (1 << pin)
 #define DIGIWRITE_L(port, pin) port &= ~(1 << pin)
 #define PRESSED(pin) ((PINA & (1 << pin)) == 0)
+
+static double WAVETABLE[100];
+
 
 int main(void) {
     // set clock divider to /1
@@ -44,7 +53,7 @@ int main(void) {
     DDRA &= (0 << PIN_BTN3);
     uint8_t input = 0;
 
-    DIGIWRITE_H(PORTA, PIN_LED);
+    DIGIWRITE_H(PORTA, PA4);
     while (1) {
         uint8_t new_input = 0;
         new_input |= PRESSED(PIN_BTN1) << 0;
@@ -53,7 +62,7 @@ int main(void) {
         if (new_input != input) {
             input = new_input;
         }
-        DIGIWRITE_L(PORTA, PIN_LED);
+        DIGIWRITE_L(PORTA, PA4);
         switch (input) {
             case 0: _delay_ms(0); break;
             case 1: _delay_ms(100); break;
@@ -64,7 +73,7 @@ int main(void) {
             case 6: _delay_ms(600); break;
             case 7: _delay_ms(700); break;
         }
-        DIGIWRITE_H(PORTA, PIN_LED);
+        DIGIWRITE_H(PORTA, PA4);
         _delay_ms(100);
 
         // echoLoop();

@@ -35,3 +35,7 @@ program-dragon: $(PROJECT).hex
 
 program-ice: $(PROJECT).hex
 	avrdude -p t44 -P usb -c atmelice_isp -U flash:w:$(PROJECT).c.hex
+
+program-arduino-usbtiny:
+	cp ~/Documents/test/test.ino.hex .
+	avrdude -p t44 -P usb -c usbtiny -U flash:w:test.ino.hex
